@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useProfile } from '../context/ProfileContext';
 import { Card } from '../components/Card';
+import { saveProfile } from '../db/database';
 import './Pages.css';
 
 const PLANS = {
@@ -16,13 +16,13 @@ const PLANS = {
 };
 
 export default function Diet() {
-  const { user, refreshProfile } = useAuth();
+  const { profile, refreshProfile } = useProfile();
   const [bmi, setBmi] = useState({ weight:'', height:'', age:'', gender:'male', activity:'1.55' });
   const [result, setResult] = useState(null);
-  const selected = user?.dietType || 'Balanced';
+  const selected = profile?.dietType || 'Balanced';
 
   const selectDiet = async (name) => {
-    await axios.put('/api/profile', { ...user, dietType: name });
+    await saveProfile({ ...profile, dietType: name });
     refreshProfile();
   };
 
@@ -43,14 +43,12 @@ export default function Diet() {
 
   return (
     <div className="page">
-      <h1 className="page-title">Diet Planner</h1>
+      <h1 className="page-title" style={{fontFamily:"'Instrument Serif', serif", fontStyle:"italic", fontWeight:400}}>Diet Planner</h1>
       <Card>
         <h2 className="card-title">Choose your diet type</h2>
         <div className="tag-row">
           {Object.keys(PLANS).map(name => (
-            <button key={name} className={`tag ${selected === name ? 'tag-active' : ''}`} onClick={() => selectDiet(name)}>
-              {name}
-            </button>
+            <button key={name} className={`tag ${selected === name ? 'tag-active' : ''}`} onClick={() => selectDiet(name)}>{name}</button>
           ))}
         </div>
       </Card>

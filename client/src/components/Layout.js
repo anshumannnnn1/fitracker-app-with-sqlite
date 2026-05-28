@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useProfile } from '../context/ProfileContext';
 import { useDate } from '../hooks/useDate';
 import './Layout.css';
 
@@ -16,7 +16,7 @@ const navItems = [
 ];
 
 export default function Layout({ children }) {
-  const { user, logout } = useAuth();
+  const { profile } = useProfile();
   const { display } = useDate();
 
   return (
@@ -27,11 +27,9 @@ export default function Layout({ children }) {
           <span className="topbar-date">{display}</span>
         </div>
         <div className="topbar-right">
-          <span className="user-name">{user?.name}</span>
-          <button className="btn-logout" onClick={logout}>Logout</button>
+          <span className="user-name">{profile?.name || 'User'}</span>
         </div>
       </header>
-
       <div className="main-body">
         <nav className="sidebar">
           {navItems.map(({ to, label, icon }) => (
@@ -43,12 +41,12 @@ export default function Layout({ children }) {
         </nav>
         <main className="page-content">{children}</main>
       </div>
-
       <nav className="bottom-nav">
         {navItems.map(({ to, label, icon }) => (
           <NavLink key={to} to={to} end={to === '/'} className={({isActive}) => `bnav-item ${isActive ? 'active' : ''}`}>
             <span>{icon}</span>
             <span>{label}</span>
+            
           </NavLink>
         ))}
       </nav>

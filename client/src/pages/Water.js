@@ -1,35 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useProfile } from '../context/ProfileContext';
 import { useDate } from '../hooks/useDate';
 import { Card, ProgressBar } from '../components/Card';
+import { getWater, setWater, saveProfile } from '../db/database';
 import './Pages.css';
 
 export default function Water() {
-  const { user, refreshProfile } = useAuth();
+  const { profile, refreshProfile } = useProfile();
   const { date } = useDate();
   const [cups, setCups] = useState(0);
   const [goalInput, setGoalInput] = useState('');
-  const waterGoal = user?.waterGoal || 8;
+  const waterGoal = profile?.waterGoal || 8;
 
-  const load = async () => { const res = await axios.get(`/api/water/${date}`); setCups(res.data.cups || 0); };
-  useEffect(() => { load(); }, [date]);
+  useEffect(() => {
+    getWater(date).then(r => setCups(r.cups || 0));
+  }, [date]);
 
   const update = async (val) => {
     const newVal = Math.max(0, val);
-    await axios.post('/api/water', { cups: newVal, date });
+    await setWater(newVal, date);
     setCups(newVal);
   };
 
   const setGoal = async () => {
     if (!goalInput) return;
-    await axios.put('/api/profile', { ...user, waterGoal: parseInt(goalInput) });
-    setGoalInput(''); refreshProfile();
+    await saveProfile({ ...profile, waterGoal: parseInt(goalInput) });
+    setGoalInput('');
+    refreshProfile();
   };
 
   return (
     <div className="page">
-      <h1 className="page-title">Water Tracker</h1>
+      <h1 className="page-title" style={{fontFamily:"'Instrument Serif', serif", fontStyle:"italic", fontWeight:400}}>Water Tracker</h1>
       <Card>
         <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
           <div style={{ fontSize: 52, fontWeight: 700, color: '#3B82F6' }}>{cups}</div>
